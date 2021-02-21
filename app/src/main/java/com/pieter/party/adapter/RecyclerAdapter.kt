@@ -5,10 +5,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.pieter.party.R
-import com.pieter.party.model.DatastoreEntry
+import com.pieter.party.datastore.EntryItem
 
 class RecyclerAdapter : RecyclerView.Adapter<RecyclerAdapter.RecyclerViewHolder>() {
-    private var items = arrayListOf<DatastoreEntry>()
+    private var items = arrayListOf<EntryItem>()
 
     class RecyclerViewHolder(item: View) : RecyclerView.ViewHolder(item)
 
@@ -20,7 +20,7 @@ class RecyclerAdapter : RecyclerView.Adapter<RecyclerAdapter.RecyclerViewHolder>
 
     override fun getItemCount() = items.size
 
-    fun setListItems(items: ArrayList<DatastoreEntry>) {
+    fun setListItems(items: ArrayList<EntryItem>) {
         this.items = items
         notifyDataSetChanged()
     }

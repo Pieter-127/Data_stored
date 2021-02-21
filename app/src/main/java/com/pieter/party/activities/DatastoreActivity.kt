@@ -3,19 +3,17 @@ package com.pieter.party.activities
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.datastore.core.DataStore
-import androidx.datastore.createDataStore
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.pieter.party.R
 import com.pieter.party.adapter.RecyclerAdapter
-import com.pieter.party.datastore.CustomSerializer
-import com.pieter.party.datastore.EntryItem
-import com.pieter.party.model.DatastoreEntry
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import java.io.IOException
+import com.pieter.party.repo.DataRepository
+import com.pieter.party.viewmodel.DatastoreViewModel
 
 class DatastoreActivity : AppCompatActivity() {
+
+    lateinit var viewModel: DatastoreViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,36 +27,19 @@ class DatastoreActivity : AppCompatActivity() {
             adapter = recyclerAdapter
         }
 
-        val dataStore: DataStore<EntryItem> =
-            createDataStore(
-                fileName = "entry_items.pb",
-                serializer = CustomSerializer
-            )
+        viewModel = ViewModelProvider(
+            this,
+            DatastoreViewModel.DatastoreViewModelFactory(DataRepository(this))
+        ).get(DatastoreViewModel::class.java)
 
-        val userPreferencesFlow: Flow<EntryItem> = dataStore.data
-            .catch { exception ->
-                // dataStore.data throws an IOException when an error is encountered when reading data
-                if (exception is IOException) {
-                    Log.e("datastore", exception.toString())
-                    emit(EntryItem.getDefaultInstance())
-                } else {
-                    throw exception
-                }
+        viewModel.flow.observe(this, Observer {
+
+            it?.let { entryItem ->
+                Log.d("this", entryItem.string)
+                Log.d("this", entryItem.int.toString())
+
+                recyclerAdapter.setListItems(arrayListOf(entryItem, entryItem, entryItem))
             }
-
-        recyclerAdapter.setListItems(
-            arrayListOf(
-                DatastoreEntry("1", 1),
-                DatastoreEntry("2", 2),
-                DatastoreEntry("3", 3),
-                DatastoreEntry("4", 4),
-                DatastoreEntry("5", 5),
-                DatastoreEntry("6", 6),
-                DatastoreEntry("7", 7),
-                DatastoreEntry("8", 8),
-                DatastoreEntry("9", 9),
-                DatastoreEntry("10", 10)
-            )
-        )
+        })
     }
 }
